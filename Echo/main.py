@@ -10,29 +10,14 @@ import os
 
 app = Flask(__name__)
 
-secret = secrets.token_urlsafe(32)
-app.secret_key = secret  # set the secret key
-
-def save_users(users):
-    with open('users3.json', 'w') as f:
-        json.dump(users, f)
-
-def load_users():
-    try:
-        with open('users3.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-
-users = load_users()
-
-# This function checks if the user is logged in
-def is_logged_in():
-    return 'username' in session
 
 
 
-@app.route('/index', methods=['GET', 'POST'])
+
+
+
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
     result = None 
     if request.method == 'POST':
@@ -61,64 +46,4 @@ def index():
         
 
     return render_template('index.html', result=result)
-
-@app.route('/about', methods=['GET', 'POST'])
-def about():
-    if not is_logged_in():
-        flash('You need to log in first.')
-        return redirect(url_for('Login'))
-    return render_template('about.html')
-
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    return render_template('home.html')
-
-@app.route('/SignUp', methods=['GET', 'POST'])
-def SignUp():
-    error = None
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        rePassword = request.form['rePassword']
-
-        # Check if passwords match
-        if password != rePassword:
-            error = 'Passwords do not match! Please try again.'
-        elif username in users:  # Check if username already exists
-            error = 'Username already exists! Please choose a different username.'
-        else:
-            # Store the username and hashed password
-            users[username] = generate_password_hash(password)
-            save_users(users)  # Save users to file
-            flash('Signup successful! You can now log in.')
-            return redirect(url_for('Login'))  # Redirect to login page after successful signup
-
-    return render_template('SignUp.html', error=error)
-
-
-@app.route('/Login', methods=['GET', 'POST'])
-def Login():
-    error = None
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        # Check if username exists and password is correct
-        if username in users and check_password_hash(users[username], password):
-            session['username'] = username  # log the user in by setting a session variable
-            return redirect(url_for('index'))  # Redirect to index page after successful login
-        else:
-            error = 'Invalid username or password! Please try again.'
-    return render_template('Login.html', error=error)
-
-@app.route('/navbar', methods=['GET', 'POST'])
-def navbar():
-    return render_template('navbar.html')
-
-@app.route('/Logout')
-def Logout():
-    session.pop('username', None)  # Clear the 'username' key from the session
-    flash('You have been logged out.')
-    return redirect(url_for('Login'))
-
 
