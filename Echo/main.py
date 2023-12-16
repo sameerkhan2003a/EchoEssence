@@ -4,6 +4,9 @@ import openai
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 import json
+import os
+
+
 
 app = Flask(__name__)
 
@@ -11,12 +14,12 @@ secret = secrets.token_urlsafe(32)
 app.secret_key = secret  # set the secret key
 
 def save_users(users):
-    with open('users1.json', 'w') as f:
+    with open('users3.json', 'w') as f:
         json.dump(users, f)
 
 def load_users():
     try:
-        with open('users1.json', 'r') as f:
+        with open('users3.json', 'r') as f:
             return json.load(f)
     except FileNotFoundError:
         return {}
@@ -26,6 +29,8 @@ users = load_users()
 # This function checks if the user is logged in
 def is_logged_in():
     return 'username' in session
+
+
 
 @app.route('/index', methods=['GET', 'POST'])
 def index():
@@ -59,6 +64,9 @@ def index():
 
 @app.route('/about', methods=['GET', 'POST'])
 def about():
+    if not is_logged_in():
+        flash('You need to log in first.')
+        return redirect(url_for('Login'))
     return render_template('about.html')
 
 @app.route('/', methods=['GET', 'POST'])
@@ -103,10 +111,14 @@ def Login():
             error = 'Invalid username or password! Please try again.'
     return render_template('Login.html', error=error)
 
-
+@app.route('/navbar', methods=['GET', 'POST'])
+def navbar():
+    return render_template('navbar.html')
 
 @app.route('/Logout')
 def Logout():
     session.pop('username', None)  # Clear the 'username' key from the session
     flash('You have been logged out.')
     return redirect(url_for('Login'))
+
+
