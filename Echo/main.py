@@ -27,7 +27,7 @@ def index():
         audio_file_path = os.path.join('EchoEssence','static', audio_file.filename)
         audio_file.save(audio_file_path)
 
-        client = openai.OpenAI(api_key='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')
+        client = openai.OpenAI(api_key=os.gete)
         with open(audio_file_path, 'rb') as audio_file:
             transcript = client.audio.translations.create(
                 model="whisper-1", 
